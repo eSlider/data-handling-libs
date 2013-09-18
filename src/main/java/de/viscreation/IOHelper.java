@@ -14,21 +14,20 @@ public class IOHelper {
    * @throws IOException
    */
   public static String getFileContent(String fileName) throws IOException {
-
     File file = new File(fileName);
+    
     if (!file.exists() || !file.isFile() || !file.canRead()) {
       return null;
     }
+    
     StringBuffer fileData = new StringBuffer();
-    BufferedReader reader = new BufferedReader(new FileReader(fileName));
+    BufferedReader reader = new BufferedReader(new FileReader(file));
     char[] buf = new char[1024];
     int numRead = 0;
     while ((numRead = reader.read(buf)) != -1) {
-      String readData = String.valueOf(buf, 0, numRead);
-      fileData.append(readData);
+      fileData.append(String.valueOf(buf, 0, numRead));
     }
     reader.close();
-
     return fileData.toString();
   }
 
