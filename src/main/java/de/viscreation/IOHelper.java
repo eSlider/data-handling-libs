@@ -5,9 +5,6 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 
-/**
- * ano, Keynote SIGOS GmbH, 19.06.2013
- */
 public class IOHelper {
 
   /**

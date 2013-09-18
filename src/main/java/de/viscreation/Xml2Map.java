@@ -13,9 +13,6 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
-/**
- * ano, Keynote SIGOS GmbH, 20.06.2013
- */
 public class Xml2Map {
 
   private static Xml2Map instance = new Xml2Map();
