@@ -32,9 +32,13 @@ public class MySqlHandler {
    * @throws IllegalAccessException 
    * @throws InstantiationException 
    */
-  public MySqlHandler(String url, String username, String password) throws Exception {
-    Class.forName("com.mysql.jdbc.Driver").newInstance();
-    connection = DriverManager.getConnection(url, username, password);
+  public MySqlHandler(String url, String username, String password) {
+    try {
+      Class.forName("com.mysql.jdbc.Driver").newInstance();
+      connection = DriverManager.getConnection(url, username, password);
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
   }
 
   public ResultSet createTable(String name) throws SQLException {
