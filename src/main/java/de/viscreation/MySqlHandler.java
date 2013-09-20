@@ -24,6 +24,15 @@ public class MySqlHandler {
   private int                                columnCount;
   private ArrayList<HashMap<String, String>> list;
   private String[]                           columns;
+  
+  static {
+    try {
+      Class.forName("com.mysql.jdbc.Driver");
+    } catch (ClassNotFoundException e) {
+      System.err.println("Error: can't load com.mysql.jdbc.Driver");
+      e.printStackTrace();
+    }
+  }
 
   /**
    * @param connectionId 
@@ -34,10 +43,8 @@ public class MySqlHandler {
    */
   public MySqlHandler(String url, String username, String password) {
     try {
-      Class.forName("com.mysql.jdbc.Driver").newInstance();
       connection = DriverManager.getConnection(url, username, password);
     } catch (Exception e) {
-      e.printStackTrace();
     }
   }
 
