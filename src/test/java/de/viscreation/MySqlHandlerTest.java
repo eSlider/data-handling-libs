@@ -20,7 +20,7 @@ public class MySqlHandlerTest {
   @Test
   public void testExecuteAsList() throws Exception {
     for (int i = 0; i < COUNT; i++) {
-      ArrayList<HashMap<String,String>> list = dbHandle.execute("SELECT * FROM Flüge LIMIT "+i+",10",1);
+      ArrayList<HashMap<String,String>> list = dbHandle.execute("SELECT * FROM Fluge LIMIT "+i+",10",1);
       list.size();
     }
   }
