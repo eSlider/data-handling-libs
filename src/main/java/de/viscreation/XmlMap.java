@@ -5,6 +5,7 @@ import java.util.HashMap;
 
 /**
  * XML data manager
+
  */
 public class XmlMap {
   
@@ -34,7 +35,7 @@ public class XmlMap {
   static public final char EQ = '=';     // equals char
   static public final char EM = ' ';     // empty char
   static public final String EMPTY = ""; // empty string
-  
+
   /**
    * tag constructor 
    * 
@@ -51,37 +52,38 @@ public class XmlMap {
    * @return String <
    */
   public String toXml( String d ) {
-    String r = EMPTY; // attributes and result string 
-    String t = EMPTY; // tags string
+    StringBuilder t = new StringBuilder(); // attributes and result string 
+    StringBuilder r = new StringBuilder();
     
     // get attributes
     for( String k : attributes.keySet() ){
-      r += EM+k+EQ+ES+attributes.get(k)+ES; 
+      r.append(EM).append(k).append(EQ).append(ES).append(attributes.get(k)).append(ES);
     }
     
     int lenght = 0;
     for( String k : tags.keySet() ){
       for( XmlMap tag : tags.get(k) ){
-        t += tag.toXml(d+TB)+NL ; 
+        t.append(tag.toXml( new StringBuilder(d).append(TB).toString() )).append(NL); 
       }
       lenght++;
     }
     
     if (_text != EMPTY) {
-      r = d+OB+name+r+CB2+
-          _text +
-          t +
-          OB+CB1+name+CB2;
+      r = new StringBuilder().append(d)
+          // <tagName>
+          .append(OB).append(name).append(r).append(CB2)
+            // text here
+            .append(_text)
+            .append(t)
+          // </tagName>
+          .append(OB).append(CB1).append(name).append(CB2);
     }else if(lenght < 1 ) {
-      r = d+OB+name+r+CB1+CB2;
+      r = new StringBuilder().append(d).append(OB).append(name).append(r).append(CB1).append(CB2);
     }else{
-      r = d+OB+name+r+CB2+NL+
-          _text+
-          t+
-          d+OB+CB1+name+CB2;
+      r = new StringBuilder().append(d).append(OB).append(name).append(r).append(CB2).append(NL).append(_text).append(t).append(d).append(OB).append(CB1).append(name).append(CB2);
     }
     
-    return r;
+    return r.toString();
   }
   
   public XmlMap text(Object value) {
@@ -209,6 +211,6 @@ public class XmlMap {
    * @see java.lang.Object#toString()
    */
   public String toString() {
-    return xmlHead+NL+toXml();
+    return new StringBuilder(xmlHead).append(NL).append(toXml()).toString();
   }
 }

@@ -1,3 +1,11 @@
+/*
+ * Xml2Map.java, 20.06.2013
+ * 
+ * Copyright by Keynote SIGOS GmbH, Germany
+ * All rights reserved.
+ *
+ * @author Andriy Oblivantsev
+ */
 package de.viscreation;
 
 import java.io.StringReader;
@@ -12,6 +20,7 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
+
 
 public class Xml2Map {
 
