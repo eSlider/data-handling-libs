@@ -12,6 +12,6 @@ public class IOHelperTest {
 
   @Test
   public void testGetFileContent() throws IOException{
-    ArrayList<HashMap<String, String>> list = IOHelper.parseCsv("C:/Libs/export.csv");
+    ArrayList<HashMap<String, String>> list = IOHelper.parseCsv("pom.xml");
   }
 }

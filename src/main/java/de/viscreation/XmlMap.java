@@ -5,10 +5,10 @@ import java.util.HashMap;
 
 /**
  * XML data manager
-
  */
 public class XmlMap {
   
+
   /* tags container */
   public final HashMap<String, ArrayList<XmlMap>> tags       = new HashMap<String, ArrayList<XmlMap>>();
   
@@ -24,17 +24,20 @@ public class XmlMap {
   /* parent XmlMap tag */
   public XmlMap                                   parent;                               
   
+
   /* constants to generate XML */
-  static public final String xmlHead = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"; // xml head
-  static public final char ES = '"';     // escape char
-  static public final char NL = '\n';    // new line char
-  static public final char TB = '\t';    // tab char
-  static public final char OB = '<';     // open brace
-  static public final char CB1 = '/';    // close brace char 1
-  static public final char CB2 = '>';    // close brace char 2
-  static public final char EQ = '=';     // equals char
-  static public final char EM = ' ';     // empty char
-  static public final String EMPTY = ""; // empty string
+  public static final String                      xmlHead          = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"; // xml head
+  public static final char                        ES               = '"';                                         // escape char
+  public static final char                        NL               = '\n';                                        // new line char
+  public static final char                        TB               = '\t';                                        // tab char
+  public static final char                        OB               = '<';                                         // open brace
+  public static final char                        CB1              = '/';                                         // close brace char 1
+  public static final char                        CB2              = '>';                                         // close brace char 2
+  public static final char                        EQ               = '=';                                         // equals char
+  public static final char                        EM               = ' ';                                         // empty char
+  public static final String                      EMPTY            = "";                                          // empty string
+
+  private static final String                     TAGS_SPLIT_REGEX = "/";
 
   /**
    * tag constructor 
@@ -115,7 +118,11 @@ public class XmlMap {
    * @return XmlMap
    */
   public XmlMap tag(String expr){
-    return tags(expr).get(0);
+    XmlMap subTag = this;
+    for (String tagName : expr.split(TAGS_SPLIT_REGEX)) {
+        subTag = subTag.tags(tagName).get(0);
+    }
+    return subTag;
   }
   
   /**
