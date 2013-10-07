@@ -1,17 +1,41 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" 
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>de.viscreation</groupId>
+	<name>Universal Data Handling Library</name>
+	<description>Universal Data Handling Library</description>
   <artifactId>DataHandler</artifactId>
-  
+  <groupId>de.viscreation</groupId>
   <version>0.0.1-SNAPSHOT</version>
+  
+  <scm>
+    <developerConnection>Andriy Oblivantsev</developerConnection>
+  </scm>
+  
 	<dependencies>
+	 
+	  <!-- MySQL Driver -->
 		<dependency>
 			<groupId>mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>
-			<version>5.1.26</version>
+			<version>LATEST</version>
+		</dependency>
+		
+		<!-- SQLite Driver -->
+		<dependency>
+		  <groupId>org.xerial</groupId>
+		  <artifactId>sqlite-jdbc</artifactId>
+		  <version>LATEST</version>
+		</dependency>
+		
+		<!-- Using and avoiding null -->
+		<dependency>
+		    <groupId>com.google.guava</groupId>
+		    <artifactId>guava</artifactId>
+		    <version>LATEST</version>
 		</dependency>
 	</dependencies>
+	
+	<properties>
+		<mysqlSetting>test</mysqlSetting>
+	</properties>
+	
 </project>

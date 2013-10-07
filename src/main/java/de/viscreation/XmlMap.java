@@ -23,18 +23,21 @@ public class XmlMap {
   /* parent XmlMap tag */
   public XmlMap                                   parent;                               
   
+
   /* constants to generate XML */
-  static public final String xmlHead = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"; // xml head
-  static public final char ES = '"';     // escape char
-  static public final char NL = '\n';    // new line char
-  static public final char TB = '\t';    // tab char
-  static public final char OB = '<';     // open brace
-  static public final char CB1 = '/';    // close brace char 1
-  static public final char CB2 = '>';    // close brace char 2
-  static public final char EQ = '=';     // equals char
-  static public final char EM = ' ';     // empty char
-  static public final String EMPTY = ""; // empty string
-  
+  public static final String                      xmlHead          = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"; // xml head
+  public static final char                        ES               = '"';                                         // escape char
+  public static final char                        NL               = '\n';                                        // new line char
+  public static final char                        TB               = '\t';                                        // tab char
+  public static final char                        OB               = '<';                                         // open brace
+  public static final char                        CB1              = '/';                                         // close brace char 1
+  public static final char                        CB2              = '>';                                         // close brace char 2
+  public static final char                        EQ               = '=';                                         // equals char
+  public static final char                        EM               = ' ';                                         // empty char
+  public static final String                      EMPTY            = "";                                          // empty string
+
+  private static final String                     TAGS_SPLIT_REGEX = "/";
+
   /**
    * tag constructor 
    * 
@@ -51,37 +54,38 @@ public class XmlMap {
    * @return String <
    */
   public String toXml( String d ) {
-    String r = EMPTY; // attributes and result string 
-    String t = EMPTY; // tags string
+    StringBuilder t = new StringBuilder(); // attributes and result string 
+    StringBuilder r = new StringBuilder();
     
     // get attributes
     for( String k : attributes.keySet() ){
-      r += EM+k+EQ+ES+attributes.get(k)+ES; 
+      r.append(EM).append(k).append(EQ).append(ES).append(attributes.get(k)).append(ES);
     }
     
     int lenght = 0;
     for( String k : tags.keySet() ){
       for( XmlMap tag : tags.get(k) ){
-        t += tag.toXml(d+TB)+NL ; 
+        t.append(tag.toXml( new StringBuilder(d).append(TB).toString() )).append(NL); 
       }
       lenght++;
     }
     
     if (_text != EMPTY) {
-      r = d+OB+name+r+CB2+
-          _text +
-          t +
-          OB+CB1+name+CB2;
+      r = new StringBuilder().append(d)
+          // <tagName>
+          .append(OB).append(name).append(r).append(CB2)
+            // text here
+            .append(_text)
+            .append(t)
+          // </tagName>
+          .append(OB).append(CB1).append(name).append(CB2);
     }else if(lenght < 1 ) {
-      r = d+OB+name+r+CB1+CB2;
+      r = new StringBuilder().append(d).append(OB).append(name).append(r).append(CB1).append(CB2);
     }else{
-      r = d+OB+name+r+CB2+NL+
-          _text+
-          t+
-          d+OB+CB1+name+CB2;
+      r = new StringBuilder().append(d).append(OB).append(name).append(r).append(CB2).append(NL).append(_text).append(t).append(d).append(OB).append(CB1).append(name).append(CB2);
     }
     
-    return r;
+    return r.toString();
   }
   
   public XmlMap text(Object value) {
@@ -113,7 +117,11 @@ public class XmlMap {
    * @return XmlMap
    */
   public XmlMap tag(String expr){
-    return tags(expr).get(0);
+    XmlMap subTag = this;
+    for (String tagName : expr.split(TAGS_SPLIT_REGEX)) {
+        subTag = subTag.tags(tagName).get(0);
+    }
+    return subTag;
   }
   
   /**
@@ -209,6 +217,6 @@ public class XmlMap {
    * @see java.lang.Object#toString()
    */
   public String toString() {
-    return xmlHead+NL+toXml();
+    return new StringBuilder(xmlHead).append(NL).append(toXml()).toString();
   }
 }

@@ -42,10 +42,8 @@ public class MySqlHandler {
    */
   public MySqlHandler(String url, String username, String password) {
     try {
-      Class.forName("com.mysql.jdbc.Driver").newInstance();
       connection = DriverManager.getConnection(url, username, password);
     } catch (Exception e) {
-      e.printStackTrace();
     }
   }
 
