@@ -2,6 +2,7 @@ package de.viscreation;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -9,9 +10,9 @@ import java.util.HashMap;
 
 public class IOHelper {
 
-  private static final String NEW_LINE_REGEXP = "\\r?\\n";
-  private static final String EMPTY = "";
-  private static final String CLEAN_CHARACTERS = "^\"|\"$";
+  private static final String NEW_LINE_REGEXP      = "\\r?\\n";
+  private static final String EMPTY                = "";
+  private static final String CLEAN_CHARACTERS     = "^\"|\"$";
   private static final String SPLIT_ROW_CHARACTERS = "\";\"";
 
   /**
@@ -22,7 +23,10 @@ public class IOHelper {
    */
   public static String getFileContent(String fileName) throws IOException {
     File file = new File(fileName);
-    
+    return getFileContent(file);
+  }
+
+  public static String getFileContent(File file) throws FileNotFoundException, IOException {
     if (!file.exists() || !file.isFile() || !file.canRead()) {
       return null;
     }

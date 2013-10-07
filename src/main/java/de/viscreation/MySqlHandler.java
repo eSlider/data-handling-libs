@@ -9,12 +9,13 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Hashtable;
 
 public class MySqlHandler {
 
+  private static final String START_BRACE = " (";
+  private static final String LIMIT_ONE = " LIMIT 0,1";
   private static final String INSERT_VALUES = ") VALUES (";
-  private static final String INSERT_INTO = "INSERT INTO";
+  private static final String INSERT_INTO = "INSERT INTO ";
   private static final char BACK_BRACE2 = ')';
   private static final char                  COMMA        = ',';
   private static final char                  BACK_BRACE   = '`';
@@ -22,8 +23,15 @@ public class MySqlHandler {
   private Connection                         connection   = null;
   private HashMap<String, String>            data;
   private int                                columnCount;
-  private ArrayList<HashMap<String, String>> list;
   private String[]                           columns;
+  private StringBuilder keys;
+  private StringBuilder values;
+  private PreparedStatement statement;
+  private ResultSet result;
+  private String value;
+  private Integer intResult;
+  private HashMap<String, String> dataResult;
+  private ArrayList<HashMap<String, String>> _list;
 
   /**
    * @param connectionId 
@@ -41,19 +49,27 @@ public class MySqlHandler {
     }
   }
 
-  public ResultSet createTable(String name) throws SQLException {
-    return execute("CREATE TABLE IF NOT EXISTS `"+name+"` ( `id` INT(10) NULL AUTO_INCREMENT, `creationDate` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,  PRIMARY KEY (`id`) ) COLLATE='utf8_general_ci' ENGINE=MyISAM");
+  public Connection getConnection(){
+    return connection;
   }
   
-  public long insert(String tableName,  Hashtable<String,Object> data ) throws SQLException {
-    long id;
+  public boolean truncateTable(String name) throws SQLException {
+    return connection.prepareStatement( "TRUNCATE " + name).execute();
+  }
+  
+  public ResultSet createTable(String name) throws SQLException {
+    return _execute("CREATE TABLE IF NOT EXISTS `"+name
+        +"` ( `id` INT(10) NULL AUTO_INCREMENT, `creationDate` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,  PRIMARY KEY (`id`) ) COLLATE='utf8_general_ci' ENGINE=MyISAM");
+  }
+  
+  public long insert(String tableName,  HashMap<String,Object> data ) throws SQLException {
+    long id = 0;
     String sql;
-    StringBuilder keys = new StringBuilder();
-    StringBuilder values = new StringBuilder();
+    keys = new StringBuilder();
+    values = new StringBuilder();
     String value;
     int i = 0;
-    PreparedStatement statement;
-    ResultSet result;
+    result = null;
     
     // prepare sql 
     for ( String key : data.keySet()) {
@@ -64,7 +80,7 @@ public class MySqlHandler {
     values.setLength(values.length()-1);
     keys.setLength(keys.length()-1);
     
-    sql = INSERT_INTO+BACK_BRACE +tableName+BACK_BRACE +" (" +keys+ INSERT_VALUES+values + BACK_BRACE2;
+    sql = INSERT_INTO+BACK_BRACE +tableName+BACK_BRACE +START_BRACE +keys+ INSERT_VALUES+values + BACK_BRACE2;
     
     statement = connection.prepareStatement( sql , Statement.RETURN_GENERATED_KEYS );
     
@@ -73,16 +89,19 @@ public class MySqlHandler {
       statement.setString(++i, value);
     }
     
-    statement.execute();
-    id = statement.executeUpdate();
-    result = statement.getGeneratedKeys();
-    
-    if (result.next()){
+    try {
+      //statement.execute();
+      id = statement.executeUpdate();
+      result = statement.getGeneratedKeys();
+      if (result.next()){
         id=result.getInt(1);
+      }
+      close(statement);
+      close(result);
+      
+    } catch (SQLException e) {
+      e.printStackTrace();
     }
-    
-    close(statement);
-    close(result);
     
     return id;
   }
@@ -102,21 +121,91 @@ public class MySqlHandler {
    * @return result set
    * @throws SQLException
    */
-  public ResultSet execute(String sql) throws SQLException{
-    return connection.createStatement().executeQuery(sql);
+  public ResultSet _execute(String sql){
+    result = null;
+    try {
+      result = connection.createStatement().executeQuery(sql);
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }
+    return result;
   }
   
-  public ArrayList<HashMap<String, String>> execute(String sql, int mode) throws SQLException{
-    ResultSet resultSet = execute(sql);
-    return convertResultSetToList(resultSet, getResultColumns(resultSet.getMetaData()));
+  
+  /**
+   * get int by sql query
+   * 
+   * @param sql
+   * @return int
+   * @throws SQLException
+   */
+  public Integer getInt(String sql){
+    value = null;
+    intResult = null;
+    
+    try {
+      value = getValue(sql);
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }
+    
+    if(value != null){
+      intResult = Integer.parseInt(value);
+    }
+    
+    return intResult;
+  }
+  
+  /**
+   * get string value by sql query
+   * 
+   * @param sql
+   * @return String
+   * @throws SQLException
+   */
+  public String getValue(String sql) throws SQLException{
+    
+    result = _execute(sql+LIMIT_ONE);
+    value = null;
+    if( result != null && result.next() ){
+      value = result.getString(1);
+      close(result);
+    }
+    
+    return value;
+  }
+  
+  /**
+   * get string value by sql query
+   * 
+   * @param sql
+   * @return int if 
+   * @throws SQLException
+   */
+  public HashMap<String, String> getRow(String sql) throws SQLException{
+    _list = execute(sql);
+    HashMap<String, String> data = null;
+    if(_list != null && _list.size() > 0) {
+      data = _list.get(0);
+    }
+    return data;
+  }
+
+  public ArrayList<HashMap<String, String>> execute(String sql) throws SQLException{
+    _list = null;
+    result = _execute(sql);
+    if(result !=null){
+      _list = convertResultSetToList(result, getResultColumns(result.getMetaData()));
+    }
+    return _list;
   }
 
   public ArrayList<HashMap<String, String>> convertResultSetToList(ResultSet resultSet, String[] columns) throws SQLException {
-    list = new  ArrayList<HashMap<String, String>>();
+    _list = new  ArrayList<HashMap<String, String>>();
     while (resultSet.next()) {
-      list.add(convertResultToMap(resultSet, columns));
+      _list.add(convertResultToMap(resultSet, columns));
     }
-    return list;
+    return _list;
   }
 
   public HashMap<String, String> convertResultToMap(ResultSet resultSet, String[] columns) throws SQLException{
