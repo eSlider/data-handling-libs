@@ -21,7 +21,9 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
-
+/**
+ * ano, Keynote SIGOS GmbH, 20.06.2013
+ */
 public class Xml2Map {
 
   private static Xml2Map instance = new Xml2Map();
@@ -29,7 +31,7 @@ public class Xml2Map {
   private Attr           attribute;
 
   public static XmlMap parseFile(String fileName) throws Exception {
-    return parseXmlString(IOHelper.getFileContent(fileName));
+    return parseXmlString(IOUtils.getFileContent(fileName));
   }
   
   public static XmlMap parseXmlString( String xmlContent ) {

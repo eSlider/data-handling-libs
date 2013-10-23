@@ -5,37 +5,51 @@ import java.util.HashMap;
 
 /**
  * XML data manager
+ * 
+ * @author ano, Keynote SIGOS GmbH, 20.06.2013
  */
 public class XmlMap {
   
-  /* tags container */
-  public final HashMap<String, ArrayList<XmlMap>> tags       = new HashMap<String, ArrayList<XmlMap>>();
-  
-  /* attributes container */
-  public final HashMap<String, String>            attributes = new HashMap<String, String>();
-  
-  /* tag name */
+  /** tags container */
+  public final HashMap<String, ArrayList<XmlMap>> tags             = new HashMap<String, ArrayList<XmlMap>>();
+
+  /** attributes container */
+  public final Dict<String>                       attributes       = new Dict<String>();
+
+  /** tag name */
   public String                                   name;
 
-  /* tag name */
-  public String                                   _text      = EMPTY;
-  
-  /* parent XmlMap tag */
-  public XmlMap                                   parent;                               
-  
+  /** tag name */
+  private String                                  _text            = EMPTY;
+
+  /** parent XmlMap tag */
+  public XmlMap                                   parent;
 
   /* constants to generate XML */
+
+  /** Request XML head */
   public static final String                      xmlHead          = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"; // xml head
-  public static final char                        ES               = '"';                                         // escape char
+  public static final char                        QUOT_CHAR        = '\"';                                        // escape char
   public static final char                        NL               = '\n';                                        // new line char
   public static final char                        TB               = '\t';                                        // tab char
-  public static final char                        OB               = '<';                                         // open brace
+  public static final char                        LT_CHAR          = '<';                                         // open brace
+  public static final char                        GT_CHAR          = '>';                                         // close brace char 2
   public static final char                        CB1              = '/';                                         // close brace char 1
-  public static final char                        CB2              = '>';                                         // close brace char 2
   public static final char                        EQ               = '=';                                         // equals char
   public static final char                        EM               = ' ';                                         // empty char
-  public static final String                      EMPTY            = "";                                          // empty string
+  private static final char                       AMP_CHAR         = '&';                                         // amp char
+  private static final char                       APOS_CHAR        = '\'';                                        // apostroph char
 
+  private static final String                     AMP              = "&amp;";
+  private static final String                     APOS             = "&apos;";
+  private static final String                     GT               = "&gt;";
+  private static final String                     QUOT             = "&quot;";
+  private static final String                     LT               = "&lt;";
+
+  /** Empty string */
+  public static final String                      EMPTY            = "";
+
+  /** String to split tags by */
   private static final String                     TAGS_SPLIT_REGEX = "/";
 
   /**
@@ -45,6 +59,53 @@ public class XmlMap {
    */
   public XmlMap(String name) {
     this.name = name;
+  }
+  
+  
+  /**
+   * encode char
+   * 
+   * @param value string or char
+   * @return object value
+   */
+  public static Object encodeChar(char value) {
+    switch (value) {
+      case LT_CHAR:     return LT;
+      case GT_CHAR:     return GT;
+      case QUOT_CHAR:   return QUOT;
+      case APOS_CHAR:   return APOS;
+      case AMP_CHAR:    return AMP;
+    }
+    return value;
+  }
+  
+  /**
+   * encode XML attribute
+   * 
+   * @param value
+   * @return encoded string
+   */
+  public static String encodeAttribute(String value) {
+    if (value == null) {
+      return EMPTY;
+    }
+
+    int len = value.length();
+    
+    if (len == 0) {
+      return EMPTY;
+    }
+
+    StringBuffer encoded = new StringBuffer();
+    for (int i = 0; i < len; i++) {
+      encoded.append(encodeChar(value.charAt(i)));
+    }
+    
+    return encoded.toString();
+  }
+  
+  public String decodeAttribute(String value) {
+    return value;
   }
   
   /**
@@ -59,7 +120,9 @@ public class XmlMap {
     
     // get attributes
     for( String k : attributes.keySet() ){
-      r.append(EM).append(k).append(EQ).append(ES).append(attributes.get(k)).append(ES);
+      r.append(EM).append(k).append(EQ).append(QUOT_CHAR).append(
+          encodeAttribute(attributes.get(k))
+        ).append(QUOT_CHAR);
     }
     
     int lenght = 0;
@@ -72,17 +135,17 @@ public class XmlMap {
     
     if (_text != EMPTY) {
       r = new StringBuilder().append(d)
-          // <tagName>
-          .append(OB).append(name).append(r).append(CB2)
-            // text here
-            .append(_text)
-            .append(t)
-          // </tagName>
-          .append(OB).append(CB1).append(name).append(CB2);
+        // <tagName>
+        .append(LT_CHAR).append(name).append(r).append(GT_CHAR)
+          // text here
+          .append(_text)
+          .append(t)
+        // </tagName>
+        .append(LT_CHAR).append(CB1).append(name).append(GT_CHAR);
     }else if(lenght < 1 ) {
-      r = new StringBuilder().append(d).append(OB).append(name).append(r).append(CB1).append(CB2);
+      r = new StringBuilder().append(d).append(LT_CHAR).append(name).append(r).append(CB1).append(GT_CHAR);
     }else{
-      r = new StringBuilder().append(d).append(OB).append(name).append(r).append(CB2).append(NL).append(_text).append(t).append(d).append(OB).append(CB1).append(name).append(CB2);
+      r = new StringBuilder().append(d).append(LT_CHAR).append(name).append(r).append(GT_CHAR).append(NL).append(_text).append(t).append(d).append(LT_CHAR).append(CB1).append(name).append(GT_CHAR);
     }
     
     return r.toString();
@@ -93,12 +156,17 @@ public class XmlMap {
     return this;
   }
   
+  /**
+   * Get tag text content
+   * 
+   * @return text content
+   */
   public String text() {
     return _text;
   }
   
   /**
-   * replace tag info
+   * Replace tag info
    * 
    * @param expr
    * @param value
@@ -111,48 +179,56 @@ public class XmlMap {
   }
   
   /**
-   * get tag by name
+   * Get or create tag by name
    * 
    * @param expr
    * @return XmlMap
    */
   public XmlMap tag(String expr){
-    XmlMap subTag = this;
-    for (String tagName : expr.split(TAGS_SPLIT_REGEX)) {
-        subTag = subTag.tags(tagName).get(0);
-    }
-    return subTag;
+    return tags(expr).get(0);
   }
   
   /**
-   * get tags by name 
-   * if nothing found, create and add the tag!
+   * Get or create tags by name.
    * 
-   * @param expr
-   * @return
+   * @param searchTagName tag name to search
+   * @return list of XmlMap's
    */
-  public ArrayList<XmlMap> tags(String searchTagName) {
-    ArrayList<XmlMap> arrayList;
+  public ArrayList<XmlMap> tags(String expr) {
+    ArrayList<XmlMap> arrayList = null;
     XmlMap xmlMap;
     
-    // get tag if doesn't exists
-    if (tags.containsKey(searchTagName) ){
-      arrayList = tags.get(searchTagName);
-    } else {
-      arrayList = new ArrayList<XmlMap>();
-      tags.put(searchTagName, arrayList);
-    }
+    HashMap<String, ArrayList<XmlMap>> tags = this.tags;
     
-    // create one tag if doesn't exists
-    if (arrayList.size() <  1) {
-      xmlMap = new XmlMap(searchTagName);
-      xmlMap.parent = this;
-      arrayList.add(xmlMap);
-    } 
+    for (String tagName : expr.split(TAGS_SPLIT_REGEX)) {
+      
+      // get tag if doesn't exists
+      if (tags.containsKey(tagName) ){
+        arrayList = tags.get(tagName);
+      } else {
+        arrayList = new ArrayList<XmlMap>();
+        tags.put(tagName, arrayList);
+      }
+      
+      // create one tag if doesn't exists
+      if (arrayList.size() <  1) {
+        xmlMap = new XmlMap(tagName);
+        xmlMap.parent = this;
+        arrayList.add(xmlMap);
+      } 
+      
+      tags = arrayList.get(0).tags;
+    }
 
     return arrayList;
   }
   
+  /**
+   * Add new tag
+   * 
+   * @param tag xml tag
+   * @return  same tag as argument given
+   */
   public XmlMap addTag(XmlMap tag){
     ArrayList<XmlMap> tagsList;
     String tagName = tag.name;
@@ -181,10 +257,10 @@ public class XmlMap {
   }
   
   /**
-   * get attribute 
+   * Get tag attribute 
    * 
-   * @param key
-   * @return String
+   * @param key - attribute key 
+   * @return attribute value
    */
   public String attr(String key){
     return attributes.containsKey(key)? attributes.get(key):EMPTY;
@@ -205,7 +281,7 @@ public class XmlMap {
   /**
    * convet object to XML
    * 
-   * @return
+   * @return XML string
    */
   public String toXml(){
     return toXml(EMPTY);
@@ -215,8 +291,9 @@ public class XmlMap {
    * convert object to string
    * 
    * @see java.lang.Object#toString()
+   * @return XML string with head
    */
   public String toString() {
-    return new StringBuilder(xmlHead).append(NL).append(toXml()).toString();
+    return new StringBuilder(xmlHead).append(NL).append(toXml()).append(NL).toString();
   }
 }
