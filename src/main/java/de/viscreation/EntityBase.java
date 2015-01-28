@@ -3,11 +3,7 @@ package de.viscreation;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 
-import com.keynote.sigos.guixml.managers.entities.annotations.GuiXml;
 
-/**
- * Base class to generate GuiXML speicific XML
- */
 public class EntityBase {
 
   // constants
@@ -18,7 +14,7 @@ public class EntityBase {
   protected static final String TYPE_ATTRIBUTE  = "type";
 
   /**
-   * Package field value to XML only for GuiXml
+   * Package field value to XML only for CustomAnnotation
    * 
    * @param annotation
    * @param field
@@ -26,7 +22,7 @@ public class EntityBase {
    * @throws IllegalArgumentException
    * @throws IllegalAccessException
    */
-  protected XmlMap packFieldToGuiXml(GuiXml annotation, Field field) throws IllegalArgumentException, IllegalAccessException {
+  protected XmlMap packFieldToCustomAnnotation(CustomAnnotation annotation, Field field) throws IllegalArgumentException, IllegalAccessException {
     return new XmlMap(VALUE_ATTRIBUTE)
       .attr(NAME_ATTRIBUTE, annotation.name())
       .attr(DATA_ATTRIBUTE, field.get(this).toString())
@@ -40,13 +36,13 @@ public class EntityBase {
    * @throws IllegalArgumentException
    * @throws IllegalAccessException
    */
-  public XmlMap toGuiXml() {
+  public XmlMap toCustomAnnotation() {
     XmlMap xmlMap = new XmlMap(ROOT_TAG);
     try {
       for (Field field : getClass().getFields()) {
         for (Annotation annotation : field.getDeclaredAnnotations()) {
-          if (annotation instanceof GuiXml) {
-            xmlMap.addTag(packFieldToGuiXml((GuiXml) annotation,field));
+          if (annotation instanceof CustomAnnotation) {
+            xmlMap.addTag(packFieldToCustomAnnotation((CustomAnnotation) annotation,field));
             break;
           }
         }
@@ -59,6 +55,6 @@ public class EntityBase {
 
   @Override
   public String toString() {
-    return toGuiXml().toString();
+    return toCustomAnnotation().toString();
   }
 }

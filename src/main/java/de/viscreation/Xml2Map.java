@@ -22,7 +22,7 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
 /**
- * ano, Keynote SIGOS GmbH, 20.06.2013
+ * ano@viscreation.de, 20.06.2013
  */
 public class Xml2Map {
 

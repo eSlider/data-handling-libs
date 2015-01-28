@@ -12,6 +12,7 @@ public class IOHelperTest {
 
   @Test
   public void testGetFileContent() throws IOException{
-    ArrayList<HashMap<String, String>> list = IOHelper.parseCsv("pom.xml");
+    ArrayList<HashMap<String, String>> list = IOUtils.parseCsv("pom.xml");
+    int listLength = list.size();
   }
 }
